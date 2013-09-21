@@ -3,7 +3,7 @@
 
 #include "System.h"
 
-enum {
+enum IMAGE_TYPE {
   IMAGE_UNKNOWN = -1,
   IMAGE_GBA     = 0,
   IMAGE_GB      = 1
@@ -22,7 +22,7 @@ bool utilIsGBImage(const char *);
 bool utilIsGzipFile(const char *);
 bool utilIsZipFile(const char *);
 void utilStripDoubleExtension(const char *, char *);
-uint32_t utilFindType(const char *);
+IMAGE_TYPE utilFindType(const char *);
 uint8_t *utilLoad(const char *, bool (*)(const char*), uint8_t *, int &);
 
 void utilPutDword(uint8_t *, uint32_t);

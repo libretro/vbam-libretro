@@ -764,7 +764,7 @@ void soundSaveGame( gzFile out )
 #ifdef __LIBRETRO__
 	utilWriteDataMem( out, gba_state );
 #else
-	utilWriteData( data, gba_state );
+	utilWriteData( out, gba_state );
 #endif
 }
 
