@@ -411,6 +411,7 @@ static void gba_init(void)
 void retro_deinit(void)
 {
    emulating = 0;
+   CPUCleanUp();
 }
 
 void retro_reset(void)
