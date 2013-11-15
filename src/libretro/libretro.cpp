@@ -412,6 +412,7 @@ void retro_deinit(void)
 {
    emulating = 0;
    CPUCleanUp();
+   soundShutdown();
 }
 
 void retro_reset(void)
