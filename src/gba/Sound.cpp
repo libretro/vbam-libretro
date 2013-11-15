@@ -490,6 +490,12 @@ void soundShutdown()
 	}
 
 	systemOnSoundShutdown();
+
+	delete stereo_buffer;
+	stereo_buffer = 0;
+	
+	delete gb_apu;
+	gb_apu = 0;
 }
 
 void soundPause()
