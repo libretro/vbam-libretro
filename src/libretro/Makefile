@@ -20,6 +20,14 @@ ifeq ($(platform), unix)
    fpic := -fPIC
    SHARED := -shared
 	TILED_RENDERING = 1
+else ifeq ($(platform), ios)
+   TARGET := $(TARGET_NAME)_libretro_ios.dylib
+   fpic := -fPIC
+   SHARED := -dynamiclib -DLSB_FIRST
+
+   CC = clang -arch armv7 -isysroot $(IOSSDK)
+   CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
+	TILED_RENDERING = 1
 else ifeq ($(platform), osx)
    TARGET := $(TARGET_NAME)_libretro.dylib
    fpic := -fPIC
