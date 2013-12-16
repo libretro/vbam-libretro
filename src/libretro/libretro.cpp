@@ -20,6 +20,7 @@
 #include "../apu/Gb_Apu.h"
 #include "../gba/Globals.h"
 
+static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t poll_cb;
 static retro_input_state_t input_cb;
@@ -88,29 +89,33 @@ static void adjust_save_ram()
          !scan_area(libretro_save_buf + 512, sizeof(libretro_save_buf) - 512))
    {
       libretro_save_size = 512;
-      fprintf(stderr, "Detecting EEprom 8kbit\n");
+      if (log_cb)
+         log_cb(RETRO_LOG_INFO, "Detecting EEprom 8kbit\n");
    }
    else if (scan_area(libretro_save_buf, 0x2000) && 
          !scan_area(libretro_save_buf + 0x2000, sizeof(libretro_save_buf) - 0x2000))
    {
       libretro_save_size = 0x2000;
-      fprintf(stderr, "Detecting EEprom 64kbit\n");
+      if (log_cb)
+         log_cb(RETRO_LOG_INFO, "Detecting EEprom 64kbit\n");
    }
 
    else if (scan_area(libretro_save_buf, 0x10000) && 
          !scan_area(libretro_save_buf + 0x10000, sizeof(libretro_save_buf) - 0x10000))
    {
       libretro_save_size = 0x10000;
-      fprintf(stderr, "Detecting Flash 512kbit\n");
+      if (log_cb)
+         log_cb(RETRO_LOG_INFO, "Detecting Flash 512kbit\n");
    }
    else if (scan_area(libretro_save_buf, 0x20000) && 
          !scan_area(libretro_save_buf + 0x20000, sizeof(libretro_save_buf) - 0x20000))
    {
       libretro_save_size = 0x20000;
-      fprintf(stderr, "Detecting Flash 1Mbit\n");
+      if (log_cb)
+         log_cb(RETRO_LOG_INFO, "Detecting Flash 1Mbit\n");
    }
-   else
-      fprintf(stderr, "Did not detect any particular SRAM type.\n");
+   else if (log_cb)
+      log_cb(RETRO_LOG_INFO, "Did not detect any particular SRAM type.\n");
 
    if (libretro_save_size == 512 || libretro_save_size == 0x2000)
       eepromData = libretro_save_buf;
@@ -184,18 +189,22 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_init(void)
 {
+   struct retro_log_callback log;
    memset(libretro_save_buf, 0xff, sizeof(libretro_save_buf));
    adjust_save_ram();
    environ_cb(RETRO_ENVIRONMENT_GET_CAN_DUPE, &can_dupe);
+   environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log);
+   if (log.log)
+      log_cb = log.log;
 
 #ifdef FRONTEND_SUPPORTS_RGB565
    enum retro_pixel_format rgb565 = RETRO_PIXEL_FORMAT_RGB565;
-   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
-      fprintf(stderr, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
+   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565) && log_cb)
+      log_cb(RETRO_LOG_INFO, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
 #else
    enum retro_pixel_format rgb8888 = RETRO_PIXEL_FORMAT_XRGB8888;
-   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb8888))
-      fprintf(stderr, "Frontend supports XRGB8888 - will use that instead of XRGB1555.\n");
+   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb8888) && log_cb)
+      log_cb(RETRO_LOG_INFO, "Frontend supports XRGB8888 - will use that instead of XRGB1555.\n");
 #endif
 }
 
@@ -325,7 +334,9 @@ static void load_image_preferences (void)
 	buffer[2] = rom[0xae];
 	buffer[3] = rom[0xaf];
 	buffer[4] = 0;
-	fprintf(stderr, "GameID in ROM is: %s\n", buffer);
+
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "GameID in ROM is: %s\n", buffer);
 
 	bool found = false;
 	int found_no = 0;
@@ -342,7 +353,8 @@ static void load_image_preferences (void)
 
 	if(found)
 	{
-		fprintf(stderr, "Found ROM in vba-over list.\n");
+      if (log_cb)
+         log_cb(RETRO_LOG_INFO, "Found ROM in vba-over list.\n");
 
 		enableRtc = gbaover[found_no].rtcEnabled;
 
@@ -356,10 +368,13 @@ static void load_image_preferences (void)
 		mirroringEnable = gbaover[found_no].mirroringEnabled;
 	}
 
-	fprintf(stderr, "RTC = %d.\n", enableRtc);
-	fprintf(stderr, "flashSize = %d.\n", flashSize);
-	fprintf(stderr, "cpuSaveType = %d.\n", cpuSaveType);
-	fprintf(stderr, "mirroringEnable = %d.\n", mirroringEnable);
+   if (log_cb)
+   {
+      log_cb(RETRO_LOG_INFO, "RTC = %d.\n", enableRtc);
+      log_cb(RETRO_LOG_INFO, "flashSize = %d.\n", flashSize);
+      log_cb(RETRO_LOG_INFO, "cpuSaveType = %d.\n", cpuSaveType);
+      log_cb(RETRO_LOG_INFO, "mirroringEnable = %d.\n", mirroringEnable);
+   }
 }
 
 static void gba_init(void)
@@ -529,8 +544,9 @@ static unsigned g_video_frames;
 
 void retro_unload_game(void)
 {
-   fprintf(stderr, "[VBA] Sync stats: Audio frames: %u, Video frames: %u, AF/VF: %.2f\n",
-         g_audio_frames, g_video_frames, (float)g_audio_frames / g_video_frames);
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "[VBA] Sync stats: Audio frames: %u, Video frames: %u, AF/VF: %.2f\n",
+            g_audio_frames, g_video_frames, (float)g_audio_frames / g_video_frames);
    g_audio_frames = 0;
    g_video_frames = 0;
 }
@@ -560,16 +576,20 @@ void systemDrawScreen()
    has_frame = 1;
 }
 
-void systemFrame() {}
+void systemFrame()
+{
+}
 
 void systemMessage(int, const char* str, ...)
 {
-   fprintf(stderr, "%s", str);
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "%s", str);
 }
 
 void systemMessage(const char* str, ...)
 {
-   fprintf(stderr, "%s", str);
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "%s", str);
 }
 
 int systemGetSensorX(void)
@@ -604,7 +624,8 @@ void systemGbPrint(u8 *data,int pages, int feed, int palette, int contrast) {}
 void systemScreenCapture(int a) {}
 void systemScreenMessage(const char*msg)
 {
-   fprintf(stderr, "DEBUG: %s\n", msg);
+   if (log_cb)
+      log_cb(RETRO_LOG_INFO, "%s\n", msg);
 }
 
 void systemSetTitle(const char *title) {}
