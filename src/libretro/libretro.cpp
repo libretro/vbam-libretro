@@ -581,17 +581,22 @@ void systemFrame()
 {
 }
 
-void systemMessage(int, const char* str, ...)
+void systemMessage(const char* fmt, ...)
 {
+   char buffer[256];
+   va_list ap;
+   va_start(ap, fmt);
+   vsprintf(buffer, fmt, ap);
    if (log_cb)
-      log_cb(RETRO_LOG_INFO, "%s", str);
+      log_cb(RETRO_LOG_INFO, "%s\n", buffer);
+   va_end(ap);
 }
 
-void systemMessage(const char* str, ...)
+void systemMessage(int, const char* str, ...)
 {
-   if (log_cb)
-      log_cb(RETRO_LOG_INFO, "%s", str);
+   systemMessage(str);
 }
+
 
 int systemGetSensorX(void)
 {
