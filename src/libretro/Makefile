@@ -31,7 +31,7 @@ else ifeq ($(platform), ios)
 	TILED_RENDERING = 1
 else ifeq ($(platform), osx)
    TARGET := $(TARGET_NAME)_libretro.dylib
-   fpic := -fPIC
+   fpic := -fPIC -mmacosx-version-min=10.6
    SHARED := -dynamiclib
 else
    TARGET := $(TARGET_NAME)_libretro.dll
