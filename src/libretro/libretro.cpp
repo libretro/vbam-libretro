@@ -20,6 +20,7 @@
 #include "../apu/Gb_Oscs.h"
 #include "../apu/Gb_Apu.h"
 #include "../gba/Globals.h"
+#include "../gba/Cheats.h"
 
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
@@ -171,7 +172,7 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   info->need_fullpath = true;
+   info->need_fullpath = false;
    info->valid_extensions = "gba";
    info->library_version = "v1.0.2";
    info->library_name = "VBA-M";
@@ -519,16 +520,34 @@ bool retro_unserialize(const void *data, size_t size)
 }
 
 void retro_cheat_reset(void)
-{}
+{
+   cheatsDeleteAll(false);
+}
 
-void retro_cheat_set(unsigned, bool, const char*)
-{}
+void retro_cheat_set(unsigned index, bool enabled, const char *code)
+{
+   const char *begin, *c;
+
+   begin = c = code;
+
+   if (!code)
+      return;
+
+   do {
+      if (*c == '+' || *c == '\0') {
+         char buf[32] = {0};
+         strncpy(buf, begin, c - begin);
+         cheatsAddCBACode(buf, "");
+         begin = ++c;
+      }
+   } while (*c++);
+}
 
 bool retro_load_game(const struct retro_game_info *game)
 {
    update_variables();
 
-   bool ret = CPULoadRom(game->path);
+   bool ret = CPULoadRomData((const char*)game->data, game->size);
 
    gba_init();
 
@@ -646,11 +665,6 @@ void systemShowSpeed(int speed) {}
 void system10Frames(int rate) {}
 
 u32 systemGetClock()
-{
-   return 0;
-}
-
-int cheatsCheckKeys(u32 keys, u32 extended)
 {
    return 0;
 }
