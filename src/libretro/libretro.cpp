@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <ctype.h>
 
 #include "libretro.h"
 #include "SoundRetro.h"
@@ -19,6 +21,7 @@
 #include "../apu/Gb_Oscs.h"
 #include "../apu/Gb_Apu.h"
 #include "../gba/Globals.h"
+#include "../gba/Cheats.h"
 
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
@@ -170,7 +173,7 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   info->need_fullpath = true;
+   info->need_fullpath = false;
    info->valid_extensions = "gba";
    info->library_version = "v1.0.2";
    info->library_name = "VBA-M";
@@ -193,9 +196,10 @@ void retro_init(void)
    memset(libretro_save_buf, 0xff, sizeof(libretro_save_buf));
    adjust_save_ram();
    environ_cb(RETRO_ENVIRONMENT_GET_CAN_DUPE, &can_dupe);
-   environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log);
-   if (log.log)
+   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
       log_cb = log.log;
+   else
+      log_cb = NULL;
 
 #ifdef FRONTEND_SUPPORTS_RGB565
    enum retro_pixel_format rgb565 = RETRO_PIXEL_FORMAT_RGB565;
@@ -517,16 +521,57 @@ bool retro_unserialize(const void *data, size_t size)
 }
 
 void retro_cheat_reset(void)
-{}
+{
+   cheatsDeleteAll(false);
+}
 
-void retro_cheat_set(unsigned, bool, const char*)
-{}
+void retro_cheat_set(unsigned index, bool enabled, const char *code)
+{
+   const char *begin, *c;
+
+   begin = c = code;
+
+   if (!code)
+      return;
+
+   do {
+      if (*c != '+' && *c != '\0')
+         continue;
+
+      char buf[32] = {0};
+      int len = c - begin;
+      int i;
+
+      // make sure it's using uppercase letters
+      for (i = 0; i < len; i++)
+         buf[i] = toupper(begin[i]);
+      buf[i] = 0;
+
+      begin = ++c;
+
+      if (len == 16)
+         cheatsAddGSACode(buf, "", false);
+      else {
+         char *space = strrchr(buf, ' ');
+         if (space != NULL) {
+            if ((buf + len - space - 1) == 4)
+               cheatsAddCBACode(buf, "");
+            else {
+               memmove(space, space+1, strlen(space+1)+1);
+               cheatsAddGSACode(buf, "", true);
+            }
+         } else if (log_cb)
+            log_cb(RETRO_LOG_INFO, "[VBA] Invalid cheat code '%s'\n", buf);
+      }
+
+   } while (*c++);
+}
 
 bool retro_load_game(const struct retro_game_info *game)
 {
    update_variables();
 
-   bool ret = CPULoadRom(game->path);
+   bool ret = CPULoadRomData((const char*)game->data, game->size);
 
    gba_init();
 
@@ -580,17 +625,28 @@ void systemFrame()
 {
 }
 
-void systemMessage(int, const char* str, ...)
+void systemMessage(const char* fmt, ...)
 {
+   char buffer[256];
+   va_list ap;
+   va_start(ap, fmt);
+   vsprintf(buffer, fmt, ap);
    if (log_cb)
-      log_cb(RETRO_LOG_INFO, "%s", str);
+      log_cb(RETRO_LOG_INFO, "%s\n", buffer);
+   va_end(ap);
 }
 
-void systemMessage(const char* str, ...)
+void systemMessage(int, const char* fmt, ...)
 {
+   char buffer[256];
+   va_list ap;
+   va_start(ap, fmt);
+   vsprintf(buffer, fmt, ap);
    if (log_cb)
-      log_cb(RETRO_LOG_INFO, "%s", str);
+      log_cb(RETRO_LOG_INFO, "%s\n", buffer);
+   va_end(ap);
 }
+
 
 int systemGetSensorX(void)
 {
@@ -633,11 +689,6 @@ void systemShowSpeed(int speed) {}
 void system10Frames(int rate) {}
 
 u32 systemGetClock()
-{
-   return 0;
-}
-
-int cheatsCheckKeys(u32 keys, u32 extended)
 {
    return 0;
 }

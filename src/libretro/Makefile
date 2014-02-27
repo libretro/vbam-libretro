@@ -31,8 +31,16 @@ else ifeq ($(platform), ios)
 	TILED_RENDERING = 1
 else ifeq ($(platform), osx)
    TARGET := $(TARGET_NAME)_libretro.dylib
-   fpic := -fPIC
+   fpic := -fPIC -mmacosx-version-min=10.6
    SHARED := -dynamiclib
+else ifeq ($(platform), qnx)
+   TARGET := $(TARGET_NAME)_libretro_qnx.so
+   fpic := -fPIC
+   SHARED := -shared
+	TILED_RENDERING = 1
+	CC = qcc -Vgcc_ntoarmv7le
+	CXX = QCC -Vgcc_ntoarmv7le_cpp
+	AR = QCC -Vgcc_ntoarmv7le
 else
    TARGET := $(TARGET_NAME)_libretro.dll
    LDFLAGS += -Wl,-no-undefined -Wl,--version-script=link.T
