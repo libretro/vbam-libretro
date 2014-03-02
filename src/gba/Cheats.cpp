@@ -1,4 +1,3 @@
-#ifndef __LIBRETRO__
 #include <memory.h>
 #include <string.h>
 #include <stdio.h>
@@ -2591,6 +2590,7 @@ void cheatsAddCBACode(const char *code, const char *desc)
   }
 }
 
+#ifndef __LIBRETRO__
 void cheatsSaveGame(gzFile file)
 {
   utilWriteInt(file, cheatsNumber);
@@ -2816,6 +2816,7 @@ bool cheatsLoadCheatList(const char *file)
   fclose(f);
   return true;
 }
+#endif
 
 extern int cpuNextEvent;
 
@@ -2897,4 +2898,3 @@ void cheatsWriteByte(u32, u8)
 #endif
 #endif
 }
-#endif
