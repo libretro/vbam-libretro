@@ -2590,6 +2590,7 @@ void cheatsAddCBACode(const char *code, const char *desc)
   }
 }
 
+#ifndef __LIBRETRO__
 void cheatsSaveGame(gzFile file)
 {
   utilWriteInt(file, cheatsNumber);
@@ -2815,6 +2816,7 @@ bool cheatsLoadCheatList(const char *file)
   fclose(f);
   return true;
 }
+#endif
 
 extern int cpuNextEvent;
 
