@@ -10,6 +10,10 @@ else ifneq ($(findstring win,$(shell uname -a)),)
    platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
    platform = osx
+   arch = intel
+ifeq ($(shell uname -a),)
+   arch = ppc
+endif
 endif
 endif
 
@@ -31,8 +35,17 @@ else ifeq ($(platform), ios)
 	TILED_RENDERING = 1
 else ifeq ($(platform), osx)
    TARGET := $(TARGET_NAME)_libretro.dylib
-   fpic := -fPIC -mmacosx-version-min=10.6
+   fpic := -fPIC
    SHARED := -dynamiclib
+   arch = intel
+ifeq ($(shell uname -a),)
+   arch = ppc
+endif
+
+ifneq ($(arch),ppc)
+   SHARED += -DLSB_FIRST
+   fpic += -mmacosx-version-min=10.6
+endif
 else ifeq ($(platform), qnx)
    TARGET := $(TARGET_NAME)_libretro_qnx.so
    fpic := -fPIC
