@@ -600,7 +600,9 @@ unsigned int CPUWriteState(u8* data, unsigned size)
    utilWriteMem(data, workRAM, 0x40000);
    utilWriteMem(data, vram, 0x20000);
    utilWriteMem(data, oam, 0x400);
-#ifndef __LIBRETRO__
+#ifdef __LIBRETRO__
+   utilWriteMem(data, pix, 4 * 240 * 160);
+#else
    utilWriteMem(data, pix, 4 * 241 * 162);
 #endif
    utilWriteMem(data, ioMem, 0x400);
@@ -640,7 +642,9 @@ static bool CPUWriteState(gzFile gzFile)
   utilGzWrite(gzFile, workRAM, 0x40000);
   utilGzWrite(gzFile, vram, 0x20000);
   utilGzWrite(gzFile, oam, 0x400);
-#ifndef __LIBRETRO__
+#ifdef __LIBRETRO__
+  utilGzWrite(gzFile, pix, 4*240*160);
+#else
   utilGzWrite(gzFile, pix, 4*241*162);
 #endif
   utilGzWrite(gzFile, ioMem, 0x400);
@@ -732,7 +736,9 @@ bool CPUReadState(const u8* data, unsigned size)
    utilReadMem(workRAM, data, 0x40000);
    utilReadMem(vram, data, 0x20000);
    utilReadMem(oam, data, 0x400);
-#ifndef __LIBRETRO__
+#ifdef __LIBRETRO__
+   utilReadMem(pix, data, 4*240*160);
+#else
    utilReadMem(pix, data, 4*241*162);
 #endif
    utilReadMem(ioMem, data, 0x400);
@@ -864,7 +870,9 @@ static bool CPUReadState(gzFile gzFile)
   utilGzRead(gzFile, workRAM, 0x40000);
   utilGzRead(gzFile, vram, 0x20000);
   utilGzRead(gzFile, oam, 0x400);
-#ifndef __LIBRETRO__
+#ifdef __LIBRETRO__
+    utilGzRead(gzFile, pix, 4*240*160);
+#else
   if(version < SAVE_GAME_VERSION_6)
     utilGzRead(gzFile, pix, 4*240*160);
   else
