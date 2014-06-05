@@ -609,20 +609,20 @@ void systemOnSoundShutdown() {}
 bool systemCanChangeSoundQuality() { return true; }
 
 #ifdef FRONTEND_SUPPORTS_RGB565
-#define GBA_PITCH 484
+#define BPP 2
 #else
-#define GBA_PITCH 964
+#define BPP 4
 #endif
 
 void systemDrawScreen()
 {
-   video_cb(pix, 240, 160, GBA_PITCH);
+   video_cb(pix, 240, 160, 240 * BPP);
    g_video_frames++;
-   has_frame = 1;
 }
 
 void systemFrame()
 {
+   has_frame = 1;
 }
 
 void systemMessage(const char* fmt, ...)
