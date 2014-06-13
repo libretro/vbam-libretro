@@ -63,18 +63,18 @@ void (*dbgSignal)(int sig, int number);
 
 void *retro_get_memory_data(unsigned id)
 {
-   if (id != RETRO_MEMORY_SAVE_RAM)
-      return 0;
+   if (id == RETRO_MEMORY_SAVE_RAM)
+      return libretro_save_buf;
 
-   return libretro_save_buf;
+   return NULL;
 }
 
 size_t retro_get_memory_size(unsigned id)
 {
    if (id != RETRO_MEMORY_SAVE_RAM)
-      return 0;
+      return libretro_save_size;
 
-   return libretro_save_size;
+   return 0;
 }
 
 static bool scan_area(const uint8_t *data, unsigned size)
