@@ -71,7 +71,7 @@ void *retro_get_memory_data(unsigned id)
 
 size_t retro_get_memory_size(unsigned id)
 {
-   if (id != RETRO_MEMORY_SAVE_RAM)
+   if (id == RETRO_MEMORY_SAVE_RAM)
       return libretro_save_size;
 
    return 0;
