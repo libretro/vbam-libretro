@@ -576,6 +576,7 @@ bool retro_load_game(const struct retro_game_info *game)
    gba_init();
 
    struct retro_memory_descriptor desc[10];
+   memset(desc, 0, sizeof(desc));
    desc[0].start=0x03000000; desc[0].select=0xFF000000; desc[0].len=0x8000;    desc[0].ptr=internalRAM;//fast WRAM
    desc[1].start=0x02000000; desc[1].select=0xFF000000; desc[1].len=0x40000;   desc[1].ptr=workRAM;//slow WRAM
    desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=libretro_save_size; desc[2].ptr=flashSaveMemory;//SRAM
