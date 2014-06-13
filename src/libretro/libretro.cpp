@@ -576,20 +576,20 @@ bool retro_load_game(const struct retro_game_info *game)
    gba_init();
 
    struct retro_memory_descriptor desc[]={
-      { .start=0x03000000, .len=0x8000, .ptr= }//fast WRAM
-      { .start=0x02000000, .len=0x40000, .ptr= }//slow WRAM
-      { .start=0x0E000000, .select=0xFFFF0000, .ptr=, .len= }//SRAM
-      { .start=0x08000000, .select=0xFE000000, .ptr=, .len=, .flags=RETRO_MEMDESC_CONST }//ROM 1
-      { .start=0x0A000000, .select=0xFE000000, .ptr=, .len=, .flags=RETRO_MEMDESC_CONST }//ROM 2
-      { .start=0x0C000000, .select=0xFE000000, .ptr=, .len=, .flags=RETRO_MEMDESC_CONST }//ROM 3
-      { .start=0x00000000, .len=0x4000, .ptr=, .flags=RETRO_MEMDESC_CONST }//BIOS
-      { .start=0x06000000, .len=0x10000, .ptr= }//VRAM part 1
-      { .start=0x06010000, .len=0x8000, .ptr=+0x10000 }//VRAM part 2 - we need two mappings due to its odd size
-      { .start=0x07000000, .len=0x400, .ptr= }//palettes
-      { .start=0x05000000, .len=0x400, .ptr= }//OAM
+      { .start=0x03000000, .len=0x8000, .ptr=internalRAM }//fast WRAM
+      { .start=0x02000000, .len=0x40000, .ptr=workRAM }//slow WRAM
+      { .start=0x0E000000, .select=0xFFFF0000, .ptr=flashSaveMemory, .len=0 }//SRAM
+      { .start=0x08000000, .select=0xFE000000, .ptr=rom, .len=0, .flags=RETRO_MEMDESC_CONST }//ROM 1
+      { .start=0x0A000000, .select=0xFE000000, .ptr=rom, .len=0, .flags=RETRO_MEMDESC_CONST }//ROM 2
+      { .start=0x0C000000, .select=0xFE000000, .ptr=rom, .len=0, .flags=RETRO_MEMDESC_CONST }//ROM 3
+      { .start=0x00000000, .len=0x4000, .ptr=bios, .flags=RETRO_MEMDESC_CONST }//BIOS
+      { .start=0x06000000, .len=0x10000, .ptr=vram }//VRAM part 1
+      { .start=0x06010000, .len=0x8000, .ptr=vram+0x10000 }//VRAM part 2 - we need two mappings due to its odd size
+      { .start=0x07000000, .len=0x400, .ptr=paletteRAM }//palettes
+      { .start=0x05000000, .len=0x400, .ptr=oam }//OAM
    };
-   struct retro_memory_map map={ memorydesc+MAX_MAPS-memorydesc_c, memorydesc_c };
-   if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &map);
+   struct retro_memory_map retromap={ desc, sizeof(desc)/sizeof(*desc) };
+   if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
    return ret;
 }
 
