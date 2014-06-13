@@ -576,19 +576,19 @@ bool retro_load_game(const struct retro_game_info *game)
    gba_init();
 
    struct retro_memory_descriptor desc[10];
-   desc[0].start=0x03000000; desc[0].select=0xFF000000; desc[0].len=0x8000;     desc[0].ptr=internalRAM;//fast WRAM
-   desc[1].start=0x02000000; desc[1].select=0xFF000000; desc[1].len=0x40000;    desc[1].ptr=workRAM;//slow WRAM
-   desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=0;          desc[2].ptr=flashSaveMemory;//SRAM
-   desc[3].start=0x08000000; desc[3].select=0xFC000000; desc[3].len=game->size; desc[3].ptr=rom;//ROM, parts 1 and 2
+   desc[0].start=0x03000000; desc[0].select=0xFF000000; desc[0].len=0x8000;    desc[0].ptr=internalRAM;//fast WRAM
+   desc[1].start=0x02000000; desc[1].select=0xFF000000; desc[1].len=0x40000;   desc[1].ptr=workRAM;//slow WRAM
+   desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=0;         desc[2].ptr=flashSaveMemory;//SRAM
+   desc[3].start=0x08000000; desc[3].select=0xFC000000; desc[3].len=0x2000000; desc[3].ptr=rom;//ROM, parts 1 and 2
       desc[3].flags=RETRO_MEMDESC_CONST;//we need two mappings since its size is not a power of 2
-   desc[4].start=0x0C000000; desc[4].select=0xFE000000; desc[4].len=game->size; desc[4].ptr=rom;//ROM part 3
+   desc[4].start=0x0C000000; desc[4].select=0xFE000000; desc[4].len=0x2000000; desc[4].ptr=rom;//ROM part 3
       desc[4].flags=RETRO_MEMDESC_CONST;
-   desc[5].start=0x00000000; desc[5].select=0xFF000000; desc[5].len=0x4000;     desc[5].ptr=bios;//BIOS
+   desc[5].start=0x00000000; desc[5].select=0xFF000000; desc[5].len=0x4000;    desc[5].ptr=bios;//BIOS
       desc[5].flags=RETRO_MEMDESC_CONST;
-   desc[6].start=0x06000000; desc[6].select=0xFF000000; desc[6].len=0x10000;    desc[6].ptr=vram;//VRAM part 1
-   desc[7].start=0x06010000; desc[7].select=0xFF000000; desc[7].len=0x8000;     desc[7].ptr=vram+0x10000;//VRAM part 2
-   desc[8].start=0x07000000; desc[8].select=0xFF000000; desc[8].len=0x400;      desc[8].ptr=paletteRAM;//palettes
-   desc[9].start=0x05000000; desc[9].select=0xFF000000; desc[9].len=0x400;      desc[9].ptr=oam;//OAM
+   desc[6].start=0x06000000; desc[6].select=0xFF000000; desc[6].len=0x10000;   desc[6].ptr=vram;//VRAM part 1
+   desc[7].start=0x06010000; desc[7].select=0xFF000000; desc[7].len=0x8000;    desc[7].ptr=vram+0x10000;//VRAM part 2
+   desc[8].start=0x07000000; desc[8].select=0xFF000000; desc[8].len=0x400;     desc[8].ptr=paletteRAM;//palettes
+   desc[9].start=0x05000000; desc[9].select=0xFF000000; desc[9].len=0x400;     desc[9].ptr=oam;//OAM
    struct retro_memory_map retromap={ desc, sizeof(desc)/sizeof(*desc) };
    if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
    return ret;
