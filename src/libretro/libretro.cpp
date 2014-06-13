@@ -578,7 +578,7 @@ bool retro_load_game(const struct retro_game_info *game)
    struct retro_memory_descriptor desc[10];
    desc[0].start=0x03000000; desc[0].select=0xFF000000; desc[0].len=0x8000;    desc[0].ptr=internalRAM;//fast WRAM
    desc[1].start=0x02000000; desc[1].select=0xFF000000; desc[1].len=0x40000;   desc[1].ptr=workRAM;//slow WRAM
-   desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=0;         desc[2].ptr=flashSaveMemory;//SRAM
+   desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=libretro_save_size; desc[2].ptr=flashSaveMemory;//SRAM
    desc[3].start=0x08000000; desc[3].select=0xFC000000; desc[3].len=0x2000000; desc[3].ptr=rom;//ROM, parts 1 and 2
       desc[3].flags=RETRO_MEMDESC_CONST;//we need two mappings since its size is not a power of 2
    desc[4].start=0x0C000000; desc[4].select=0xFE000000; desc[4].len=0x2000000; desc[4].ptr=rom;//ROM part 3
