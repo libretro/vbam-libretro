@@ -63,18 +63,18 @@ void (*dbgSignal)(int sig, int number);
 
 void *retro_get_memory_data(unsigned id)
 {
-   if (id != RETRO_MEMORY_SAVE_RAM)
-      return 0;
+   if (id == RETRO_MEMORY_SAVE_RAM)
+      return libretro_save_buf;
 
-   return libretro_save_buf;
+   return NULL;
 }
 
 size_t retro_get_memory_size(unsigned id)
 {
-   if (id != RETRO_MEMORY_SAVE_RAM)
-      return 0;
+   if (id == RETRO_MEMORY_SAVE_RAM)
+      return libretro_save_size;
 
-   return libretro_save_size;
+   return 0;
 }
 
 static bool scan_area(const uint8_t *data, unsigned size)
@@ -575,6 +575,22 @@ bool retro_load_game(const struct retro_game_info *game)
 
    gba_init();
 
+   struct retro_memory_descriptor desc[9];
+   memset(desc, 0, sizeof(desc));
+   desc[0].start=0x03000000; desc[0].select=0xFF000000; desc[0].len=0x8000;    desc[0].ptr=internalRAM;//fast WRAM
+   desc[1].start=0x02000000; desc[1].select=0xFF000000; desc[1].len=0x40000;   desc[1].ptr=workRAM;//slow WRAM
+   desc[2].start=0x0E000000; desc[2].select=0xFF000000; desc[2].len=libretro_save_size; desc[2].ptr=flashSaveMemory;//SRAM
+   desc[3].start=0x08000000; desc[3].select=0xFC000000; desc[3].len=0x2000000; desc[3].ptr=rom;//ROM, parts 1 and 2
+      desc[3].flags=RETRO_MEMDESC_CONST;//we need two mappings since its size is not a power of 2
+   desc[4].start=0x0C000000; desc[4].select=0xFE000000; desc[4].len=0x2000000; desc[4].ptr=rom;//ROM part 3
+      desc[4].flags=RETRO_MEMDESC_CONST;
+   desc[5].start=0x00000000; desc[5].select=0xFF000000; desc[5].len=0x4000;    desc[5].ptr=bios;//BIOS
+      desc[5].flags=RETRO_MEMDESC_CONST;
+   desc[6].start=0x06000000; desc[6].select=0xFF000000; desc[6].len=0x18000;   desc[6].ptr=vram;//VRAM
+   desc[7].start=0x07000000; desc[7].select=0xFF000000; desc[7].len=0x400;     desc[7].ptr=paletteRAM;//palettes
+   desc[8].start=0x05000000; desc[8].select=0xFF000000; desc[8].len=0x400;     desc[8].ptr=oam;//OAM
+   struct retro_memory_map retromap={ desc, sizeof(desc)/sizeof(*desc) };
+   if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
    return ret;
 }
 
