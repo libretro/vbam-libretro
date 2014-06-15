@@ -3902,7 +3902,7 @@ void CPULoop(int ticks)
                 case 16:
                 {
 #ifdef __LIBRETRO__
-                  u16 *dest = (u16 *)pix + 240 * (VCOUNT+1);
+                  u16 *dest = (u16 *)pix + 240 * VCOUNT;
 #else
                   u16 *dest = (u16 *)pix + 242 * (VCOUNT+1);
 #endif
@@ -3928,7 +3928,9 @@ void CPULoop(int ticks)
                     *dest++ = systemColorMap16[lineMix[x++]&0xFFFF];
                   }
                   // for filters that read past the screen
+#ifndef __LIBRETRO__
                   *dest++ = 0;
+#endif
                 }
                 break;
                 case 24:
@@ -3976,7 +3978,7 @@ void CPULoop(int ticks)
                 case 32:
                 {
 #ifdef __LIBRETRO__
-                  u32 *dest = (u32 *)pix + 240 * (VCOUNT+1);
+                  u32 *dest = (u32 *)pix + 240 * VCOUNT;
 #else
                   u32 *dest = (u32 *)pix + 241 * (VCOUNT+1);
 #endif
