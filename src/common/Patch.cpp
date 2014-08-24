@@ -7,6 +7,7 @@
 
 #include "Patch.h"
 
+#ifndef __LIBRETRO__
 
 #ifdef __GNUC__
 #if defined(__APPLE__) || defined (BSD) || defined (__NetBSD__)
@@ -28,7 +29,6 @@ typedef off64_t __off64_t;
 typedef	__int64 __off64_t;
 #endif
 
-#ifndef __LIBRETRO__
 
 static int readInt2(FILE *f)
 {
