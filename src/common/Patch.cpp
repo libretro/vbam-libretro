@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef __LIBRETRO__
 #include <zlib.h>
+#endif
 
 #include "Patch.h"
 
@@ -25,6 +27,8 @@ typedef off64_t __off64_t;
 #define ftello64 _ftelli64
 typedef	__int64 __off64_t;
 #endif
+
+#ifndef __LIBRETRO__
 
 static int readInt2(FILE *f)
 {
@@ -442,8 +446,11 @@ static bool patchApplyPPF(const char *patchname, u8 **rom, int *size)
   return res;
 }
 
+#endif
+
 bool applyPatch(const char *patchname, u8 **rom, int *size)
 {
+#ifndef __LIBRETRO__
   if (strlen(patchname) < 5)
     return false;
   const char * p = strrchr(patchname, '.');
@@ -455,5 +462,6 @@ bool applyPatch(const char *patchname, u8 **rom, int *size)
     return patchApplyUPS(patchname, rom, size);
   if (_stricmp(p, ".ppf") == 0)
     return patchApplyPPF(patchname, rom, size);
+#endif
   return false;
 }
