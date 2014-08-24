@@ -82,7 +82,7 @@ VBA_CXXSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.cpp))
 VBA_CXXOBJ := $(VBA_CXXSRCS:.cpp=.o) ../common/Patch.o
 VBA_CSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.c))
 VBA_COBJ := $(VBA_CSRCS:.c=.o)
-UTIL_SOURCES := $(wildcard ../common/utils/zlib/*.c)
+UTIL_SOURCES := 
 UTIL_OBJS := $(UTIL_SOURCES:.c=.o)
 
 OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o SoundRetro.o scrc32.o
@@ -90,8 +90,8 @@ OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o SoundRetro
 VBA_DEFINES += -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 VBA_DEFINES += -DFRONTEND_SUPPORTS_RGB565
 
-CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib
-CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib
+CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES)
+CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES)
 
 
 INCDIRS := -I$(VBA_DIR)
