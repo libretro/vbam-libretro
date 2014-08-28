@@ -15,6 +15,7 @@
 #include "gb/gbGlobals.h"
 
 #ifndef _MSC_VER
+#include <strings.h>
 #define _stricmp strcasecmp
 #endif // ! _MSC_VER
 
