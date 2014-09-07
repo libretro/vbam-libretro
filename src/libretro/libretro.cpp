@@ -39,7 +39,7 @@ extern uint64_t joy;
 static bool can_dupe;
 unsigned device_type = 0;
 int emulating = 0;
-int controller_layout = 0;
+int controller_layout[2] = {0,0};
 
 uint8_t libretro_save_buf[0x20000 + 0x2000];	/* Workaround for broken-by-design GBA save semantics. */
 
@@ -160,8 +160,28 @@ void retro_set_input_state(retro_input_state_t cb)
    input_cb = cb;
 }
 
+void retro_set_controller_port_device(unsigned port, unsigned device)
+{
+   log_cb(RETRO_LOG_INFO, "Controller %d'\n", device);
+   switch(device)
+   {
 
-
+      case RETRO_DEVICE_JOYPAD:
+      case RETRO_DEVICE_GBA:
+      default:
+         controller_layout[port] = 0;
+      break;   
+      case RETRO_DEVICE_GBA_ALT1:
+         controller_layout[port] = 1;
+      break;
+      case RETRO_DEVICE_GBA_ALT2:
+         controller_layout[port] = 2;
+      break;
+      case RETRO_DEVICE_NONE:
+         controller_layout[port] = -1;
+      break;
+   }
+}
 
 void retro_set_environment(retro_environment_t cb)
 {
@@ -175,38 +195,16 @@ void retro_set_environment(retro_environment_t cb)
    
    static const struct retro_controller_description port_1[] = {
       { "GBA Joypad", RETRO_DEVICE_GBA },
-      { "GBA Joypad YB", RETRO_DEVICE_GBA_ALT1 },
-      { "GBA Joypad AB", RETRO_DEVICE_GBA_ALT2 },
+      { "Alt Joypad YB", RETRO_DEVICE_GBA_ALT1 },
+      { "Alt Joypad AB", RETRO_DEVICE_GBA_ALT2 },
    };
 
-   static const struct retro_controller_info ports[] = {
-      { port_1, 4 },
-      { 0 },
-   };
+   static const struct retro_controller_info ports[] = {{ port_1, 4 },{ 0,0 }};
+      
+   
 
    cb(RETRO_ENVIRONMENT_SET_VARIABLES, variables);
    cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);   
-}
-
-void retro_set_controller_port_device(unsigned port, unsigned device)
-{
-   switch(device)
-   {
-      case RETRO_DEVICE_JOYPAD:
-      case RETRO_DEVICE_GBA:
-      default:
-         controller_layout = 0;
-      break;   
-      case RETRO_DEVICE_GBA_ALT1:
-         controller_layout = 1;
-      break;
-      case RETRO_DEVICE_GBA_ALT2:
-         controller_layout = 2;
-      break;
-      case RETRO_DEVICE_NONE:
-         controller_layout = -1;
-      break;
-   }
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -523,18 +521,6 @@ static unsigned has_frame;
 static void update_variables(void)
 {
  
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 #ifdef FINAL_VERSION
@@ -551,7 +537,7 @@ void retro_run(void)
 
    poll_cb();
 
-
+   
    has_frame = 0;
 
    do{
@@ -737,11 +723,11 @@ u32 systemReadJoypad(int which)
 
    for (unsigned i = 0; i < 10; i++)
    {
-      if(controller_layout == 1)
+      if(controller_layout[0] == 1)
          J |= input_cb(which, RETRO_DEVICE_JOYPAD, 0, binds1[i]) << i;
-      else if(controller_layout == 2)
+      else if(controller_layout[0] == 2)
          J |= input_cb(which, RETRO_DEVICE_JOYPAD, 0, binds2[i]) << i;
-      else if(controller_layout == -1)
+      else if(controller_layout[0] == -1)
          break;
       else
          J |= input_cb(which, RETRO_DEVICE_JOYPAD, 0, binds[i]) << i;
