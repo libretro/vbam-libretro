@@ -80,18 +80,11 @@ ifeq ($(TILED_RENDERING), 1)
 VBA_DEFINES += -DTILED_RENDERING
 endif
 
-VBA_DIR := ../
+CORE_DIR := ..
 
-VBA_SRC_DIRS := $(VBA_DIR)/gba $(VBA_DIR)/apu 
+include Makefile.common
 
-VBA_CXXSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.cpp))
-VBA_CXXOBJ := $(VBA_CXXSRCS:.cpp=.o) ../common/Patch.o
-VBA_CSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.c))
-VBA_COBJ := $(VBA_CSRCS:.c=.o)
-UTIL_SOURCES := 
-UTIL_OBJS := $(UTIL_SOURCES:.c=.o)
-
-OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o SoundRetro.o scrc32.o
+OBJS := $(SOURCES_CXX:.cpp=.o)
 
 VBA_DEFINES += -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 VBA_DEFINES += -DFRONTEND_SUPPORTS_RGB565
@@ -100,17 +93,16 @@ CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES)
 CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES)
 
 
-INCDIRS := -I$(VBA_DIR)
 LIBS :=
 
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCDIRS)
+	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCFLAGS)
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCDIRS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(INCFLAGS)
 
 clean:
 	rm -f $(OBJS)
