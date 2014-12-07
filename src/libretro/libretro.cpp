@@ -601,7 +601,7 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
                cheatsAddGSACode(buf, "", true);
             }
          } else if (log_cb)
-            log_cb(RETRO_LOG_INFO, "[VBA] Invalid cheat code '%s'\n", buf);
+            log_cb(RETRO_LOG_ERROR, "[VBA] Invalid cheat code '%s'\n", buf);
       }
 
    } while (*c++);
