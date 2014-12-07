@@ -611,7 +611,7 @@ bool retro_load_game(const struct retro_game_info *game)
 {
    update_variables();
 
-   struct retro_input_descriptor desc[] = {
+   struct retro_input_descriptor input_desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "D-Pad Down" },
@@ -626,7 +626,7 @@ bool retro_load_game(const struct retro_game_info *game)
       { 0 },
    };
 
-   environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+   environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_desc);
 
    bool ret = CPULoadRomData((const char*)game->data, game->size);
 
