@@ -89,8 +89,16 @@ OBJS := $(SOURCES_CXX:.cpp=.o)
 VBA_DEFINES += -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 VBA_DEFINES += -DFRONTEND_SUPPORTS_RGB565
 
-CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES)
-CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES)
+ifeq ($(DEBUG), 1)
+   CFLAGS += -g
+   CXXFLAGS += -g
+else
+   CFLAGS += -O3
+   CXXFLAGS += -O3
+endif
+
+CFLAGS += -std=gnu99 $(fpic) $(VBA_DEFINES)
+CXXFLAGS += $(fpic) $(VBA_DEFINES)
 
 
 LIBS :=
