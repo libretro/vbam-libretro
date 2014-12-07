@@ -39,7 +39,7 @@ extern uint64_t joy;
 static bool can_dupe;
 unsigned device_type = 0;
 int emulating = 0;
-int controller_layout[2] = {0,0};
+static int controller_layout[2] = {0,0};
 
 uint8_t libretro_save_buf[0x20000 + 0x2000];	/* Workaround for broken-by-design GBA save semantics. */
 
