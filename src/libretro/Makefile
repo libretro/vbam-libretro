@@ -47,7 +47,7 @@ else ifeq ($(platform), ios)
    SHARED := -dynamiclib -DLSB_FIRST
 
 ifeq ($(IOSSDK),)
-   IOSSDK := $(shell xcrun -sdk iphoneos -show-sdk-path)
+   IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
 endif
 
    CC = clang -arch armv7 -isysroot $(IOSSDK)
