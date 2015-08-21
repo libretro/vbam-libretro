@@ -70,6 +70,10 @@ void *retro_get_memory_data(unsigned id)
 {
    if (id == RETRO_MEMORY_SAVE_RAM)
       return libretro_save_buf;
+   if (id == RETRO_MEMORY_SYSTEM_RAM)
+      return workRAM;
+   if (id == RETRO_MEMORY_VIDEO_RAM)
+      return vram;
 
    return NULL;
 }
@@ -78,6 +82,10 @@ size_t retro_get_memory_size(unsigned id)
 {
    if (id == RETRO_MEMORY_SAVE_RAM)
       return libretro_save_size;
+   if (id == RETRO_MEMORY_SYSTEM_RAM)
+      return 0x40000;
+   if (id == RETRO_MEMORY_VIDEO_RAM)
+      return 0x20000;
 
    return 0;
 }
