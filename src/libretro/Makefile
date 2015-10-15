@@ -41,7 +41,9 @@ endif
 ifeq ($(OSX_LT_MAVERICKS),"YES")
    fpic += -mmacosx-version-min=10.5
 endif
-else ifeq ($(platform), ios)
+
+# iOS
+else ifneq (,$(findstring ios,$(platform)))
    TARGET := $(TARGET_NAME)_libretro_ios.dylib
    fpic := -fPIC
    SHARED := -dynamiclib -DLSB_FIRST
@@ -52,12 +54,14 @@ endif
 
    CC = clang -arch armv7 -isysroot $(IOSSDK)
    CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
-   OSXVER = `sw_vers -productVersion | cut -d. -f 2`
-   OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-ifeq ($(OSX_LT_MAVERICKS),"YES")
-   CC += -miphoneos-version-min=5.0
-   CXX += -miphoneos-version-min=5.0
-   SHARED += -miphoneos-version-min=5.0
+ifeq ($(platform),ios9)
+	CC     += -miphoneos-version-min=8.0
+	CXX    += -miphoneos-version-min=8.0
+	SHARED += -miphoneos-version-min=8.0
+else
+	CC     += -miphoneos-version-min=5.0
+	CXX    += -miphoneos-version-min=5.0
+	SHARED += -miphoneos-version-min=5.0
 endif
 	TILED_RENDERING = 1
 else ifeq ($(platform), theos_ios)
