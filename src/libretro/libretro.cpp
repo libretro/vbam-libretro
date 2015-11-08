@@ -196,8 +196,14 @@ void retro_set_environment(retro_environment_t cb)
    environ_cb = cb;
 
    struct retro_variable variables[] = {
-
-
+      { "vbam_layer_1", "Show layer 1; Yes|No" },
+      { "vbam_layer_2", "Show layer 2; Yes|No" },
+      { "vbam_layer_3", "Show layer 3; Yes|No" },
+      { "vbam_layer_4", "Show layer 4; Yes|No" },
+      { "vbam_layer_5", "Show sprite layer; Yes|No" },
+      { "vbam_layer_6", "Show window layer 1; Yes|No" },
+      { "vbam_layer_7", "Show window layer 2; Yes|No" },
+      { "vbam_layer_8", "Show sprite window layer; Yes|No" },
       { NULL, NULL },
    };
    
@@ -529,7 +535,25 @@ static unsigned has_frame;
 
 static void update_variables(void)
 {
- 
+   char key[256];
+   struct retro_variable var;
+   var.key=key;
+   
+   int disabled_layers=0;
+   
+   strcpy(key, "vbam_layer_x");
+   for (int i=0;i<8;i++)
+   {
+      key[strlen("vbam_layer_")]='1'+i;
+      var.value=NULL;
+      if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value && var.value[0]=='N')
+      {
+         disabled_layers|=0x100<<i;
+      }
+   }
+   layerSettings = 0xFF00 ^ disabled_layers;
+   layerEnable = DISPCNT & layerSettings;
+   CPUUpdateRenderBuffers(false);
 }
 
 #ifdef FINAL_VERSION
