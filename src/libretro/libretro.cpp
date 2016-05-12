@@ -213,7 +213,7 @@ void retro_set_environment(retro_environment_t cb)
       { "Alt Joypad AB", RETRO_DEVICE_GBA_ALT2 },
    };
 
-   static const struct retro_controller_info ports[] = {{ port_1, 4 },{ 0,0 }};
+   static const struct retro_controller_info ports[] = {{ port_1, 3 },{ 0,0 }};
       
    
 
@@ -683,7 +683,11 @@ bool retro_load_game(const struct retro_game_info *game)
    desc[8].start=0x07000000; desc[8].select=0xFF000000; desc[8].len=0x400;     desc[8].ptr=oam;//OAM
    desc[9].start=0x04000000; desc[9].select=0xFF000000; desc[9].len=0x400;     desc[9].ptr=ioMem;//bunch of registers
    struct retro_memory_map retromap={ desc, sizeof(desc)/sizeof(*desc) };
-   if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
+   
+   bool yes = true;
+   
+   ret = ret && environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
+   ret = ret && environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
    return ret;
 }
 
