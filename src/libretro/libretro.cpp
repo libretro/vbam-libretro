@@ -663,7 +663,8 @@ bool retro_load_game(const struct retro_game_info *game)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_desc);
 
-   bool ret = CPULoadRomData((const char*)game->data, game->size);
+   if (!CPULoadRomData((const char*)game->data, game->size))
+      return false;
 
    gba_init();
 
@@ -686,9 +687,11 @@ bool retro_load_game(const struct retro_game_info *game)
    
    bool yes = true;
    
-   ret = ret && environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
-   ret = ret && environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
-   return ret;
+   if (!environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap))
+      return false;
+   
+   environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+   return true;
 }
 
 bool retro_load_game_special(
