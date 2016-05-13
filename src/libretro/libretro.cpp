@@ -213,7 +213,7 @@ void retro_set_environment(retro_environment_t cb)
       { "Alt Joypad AB", RETRO_DEVICE_GBA_ALT2 },
    };
 
-   static const struct retro_controller_info ports[] = {{ port_1, 4 },{ 0,0 }};
+   static const struct retro_controller_info ports[] = {{ port_1, 3 },{ 0,0 }};
       
    
 
@@ -663,7 +663,8 @@ bool retro_load_game(const struct retro_game_info *game)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, input_desc);
 
-   bool ret = CPULoadRomData((const char*)game->data, game->size);
+   if (!CPULoadRomData((const char*)game->data, game->size))
+      return false;
 
    gba_init();
 
@@ -683,8 +684,14 @@ bool retro_load_game(const struct retro_game_info *game)
    desc[8].start=0x07000000; desc[8].select=0xFF000000; desc[8].len=0x400;     desc[8].ptr=oam;//OAM
    desc[9].start=0x04000000; desc[9].select=0xFF000000; desc[9].len=0x400;     desc[9].ptr=ioMem;//bunch of registers
    struct retro_memory_map retromap={ desc, sizeof(desc)/sizeof(*desc) };
-   if (ret) environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap);
-   return ret;
+   
+   bool yes = true;
+   
+   if (!environ_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &retromap))
+      return false;
+   
+   environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
+   return true;
 }
 
 bool retro_load_game_special(
