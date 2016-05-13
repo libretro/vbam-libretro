@@ -688,7 +688,8 @@ bool retro_load_game(const struct retro_game_info *game)
    
    bool yes = true;
    environ_cb(RETRO_ENVIRONMENT_SET_SUPPORT_ACHIEVEMENTS, &yes);
-   return ret;
+   
+   return true;
 }
 
 bool retro_load_game_special(
