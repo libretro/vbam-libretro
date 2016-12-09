@@ -18,6 +18,10 @@ endif
 endif
 
 TARGET_NAME = vbam
+GIT_VERSION := " $(shell git rev-parse --short HEAD || echo unknown)"
+ifneq ($(GIT_VERSION)," unknown")
+	CXXFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"
+endif
 
 ifeq ($(platform), unix)
    TARGET := $(TARGET_NAME)_libretro.so

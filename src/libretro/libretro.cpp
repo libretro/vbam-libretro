@@ -225,7 +225,11 @@ void retro_get_system_info(struct retro_system_info *info)
 {
    info->need_fullpath = false;
    info->valid_extensions = "gba";
+#ifdef GIT_VERSION
+   info->library_version = "git" GIT_VERSION;
+#else
    info->library_version = "svn";
+#endif
    info->library_name = "VBA-M";
    info->block_extract = false;
 }
