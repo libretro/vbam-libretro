@@ -1,4 +1,5 @@
-TILED_RENDERING = 0
+TILED_RENDERING=0
+STATIC_LINKING=0
 
 ifeq ($(platform),)
 platform = unix
@@ -88,6 +89,26 @@ else ifeq ($(platform), qnx)
 	CC = qcc -Vgcc_ntoarmv7le
 	CXX = QCC -Vgcc_ntoarmv7le_cpp
 	AR = QCC -Vgcc_ntoarmv7le
+else ifeq ($(platform), vita)
+	TARGET := $(TARGET_NAME)_libretro_vita.a
+	CC = arm-vita-eabi-gcc
+	CXX = arm-vita-eabi-g++
+	AR = arm-vita-eabi-ar
+	__FLAGS := -marm -mtune=cortex-a9 -mcpu=cortex-a9 -mfloat-abi=hard -mword-relocations
+	__FLAGS += -fno-optimize-sibling-calls -fno-strict-aliasing -fno-partial-inlining -fno-tree-vrp
+	__FLAGS += -ffast-math -fsingle-precision-constant -funroll-loops -ftracer
+    __FLAGS += -DVITA -I../vita -Wno-attributes
+
+	CFLAGS += $(__FLAGS)
+	CXXFLAGS += $(__FLAGS)
+	CXXFLAGS += -fno-exceptions -fno-rtti
+	STATIC_LINKING=1
+	TILED_RENDERING=1
+	USE_CHEATS=0
+	USE_TWEAKS=1
+	USE_THREADED_RENDERER=1
+	USE_MOTION_SENSOR=1
+	HAVE_NEON=1
 else
    TARGET := $(TARGET_NAME)_libretro.dll
    LDFLAGS += -Wl,-no-undefined -Wl,--version-script=link.T
@@ -138,11 +159,16 @@ else
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
+ifeq ($(STATIC_LINKING), 1)
+	$(AR) rcs $@ $(OBJS)
+else
 	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+endif
 
 clean:
 	rm -f $(OBJS)
 	rm -f $(TARGET)
+	rm -f *.a
 
 .PHONY: clean
 endif
