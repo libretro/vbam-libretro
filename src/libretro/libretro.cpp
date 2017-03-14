@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <string>
+#include <vector>
 
 #include "libretro.h"
 #include "SoundRetro.h"
@@ -26,6 +28,8 @@
 #define RETRO_DEVICE_GBA             RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0)
 #define RETRO_DEVICE_GBA_ALT1        RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)
 #define RETRO_DEVICE_GBA_ALT2        RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 2)
+
+#define ISHEXDEC ((codeLine[cursor]>='0') && (codeLine[cursor]<='9')) || ((codeLine[cursor]>='a') && (codeLine[cursor]<='f')) || ((codeLine[cursor]>='A') && (codeLine[cursor]<='F'))
 
 static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
@@ -606,6 +610,7 @@ void retro_cheat_reset(void)
 
 void retro_cheat_set(unsigned index, bool enabled, const char *code)
 {
+	/*
    const char *begin, *c;
 
    begin = c = code;
@@ -644,6 +649,55 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
       }
 
    } while (*c++);
+   */
+   std::string codeLine=code;
+   std::string name="cheat_"+index;
+   int matchLength=0;
+   std::vector<std::string> codeParts;
+   int cursor;
+   
+    //Break the code into Parts
+    for (cursor=0;;cursor++)
+    {
+      if (ISHEXDEC){
+         matchLength++;
+      } else {
+         if (matchLength){
+            if (matchLength>8){
+               codeParts.push_back(codeLine.substr(cursor-matchLength,8));
+               codeParts.push_back(codeLine.substr(cursor-matchLength+8,matchLength-8));
+               
+            } else {
+               codeParts.push_back(codeLine.substr(cursor-matchLength,matchLength));
+            }
+            matchLength=0;
+         }
+      }
+      if (!codeLine[cursor]){
+         break;
+      }
+    }
+   
+   //Add to core
+   for (cursor=0;cursor<codeParts.size();cursor+=2){
+      std::string codeString;
+      codeString+=codeParts[cursor];
+      
+      if (codeParts[cursor+1].length()==8){
+         codeString+=codeParts[cursor+1];
+         cheatsAddGSACode(codeString.c_str(),name.c_str(),true);
+      } else if (codeParts[cursor+1].length()==4) {
+         codeString+=" ";
+         codeString+=codeParts[cursor+1];
+         cheatsAddCBACode(codeString.c_str(),name.c_str());
+      } else {
+         codeString+=" ";
+         codeString+=codeParts[cursor+1];
+         log_cb(RETRO_LOG_ERROR, "[VBA] Invalid cheat code '%s'\n", codeString.c_str());
+      }
+      log_cb(RETRO_LOG_INFO, "[VBA] Cheat code added: '%s'\n", codeString.c_str());
+   }
+   
 }
 
 bool retro_load_game(const struct retro_game_info *game)
