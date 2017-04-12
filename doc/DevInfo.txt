@@ -49,12 +49,3 @@ If you want to enable OpenAL sound output, install the OpenAL SDK. If you do not
 SubWCRev.exe is used to append the svn versioning to the output executable, this as of TortoiseSVN 1.7, is only available by installing TortoiseSVN.
 All other dependencies for MSVC builds may be found in the ../dependencies directory (above /trunk).
 Normally, Windows users will want to checkout the root of the repository instead of just the trunk directory. Afterwards, simply opening the .sln of choice, setting preprocessor definitions, and hitting build is all that's required.
-
-===*nix/GTK===
-This is the standard build configuration on non-Windows.
-Running cmake will inform you of any packages you need to install.
-
-===*/wxw===
-The wxWidgets interface is an in-development frontend meant to be more cross-platform friendly than MFC and GTK.
-Running cmake will inform you of any packages you need to install.
-NOTE: In addition to what cmake currently checks for, you will also need the wxrc tool and libgdiplus.
