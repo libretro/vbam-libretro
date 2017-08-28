@@ -1,6 +1,13 @@
 TILED_RENDERING=0
 STATIC_LINKING=0
 
+SPACE :=
+SPACE := $(SPACE) $(SPACE)
+BACKSLASH :=
+BACKSLASH := \$(BACKSLASH)
+filter_out1 = $(filter-out $(firstword $1),$1)
+filter_out2 = $(call filter_out1,$(call filter_out1,$1))
+
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
