@@ -123,12 +123,16 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	PlatformSuffix = $(subst windows_msvc2017_,,$(platform))
 	ifneq (,$(findstring desktop,$(PlatformSuffix)))
 		WinPartition = desktop
-		CFLAGS += -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP
+		WINPLATFORMDEFINES := -DWINAPI_FAMILY=WINAPI_FAMILY_DESKTOP_APP
+		CFLAGS += $(WINPLATFORMDEFINES)
+		CXXFLAGS += $(WINPLATFORMDEFINES)
 		LDFLAGS += -MANIFEST -LTCG:incremental -NXCOMPAT -DYNAMICBASE -DEBUG -OPT:REF -INCREMENTAL:NO -SUBSYSTEM:WINDOWS -MANIFESTUAC:"level='asInvoker' uiAccess='false'" -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1
 		LIBS += kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib
 	else ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		WinPartition = uwp
-		CFLAGS += -DWINAPI_FAMILY=WINAPI_FAMILY_APP -DWINDLL -D_UNICODE -DUNICODE -DWRL_NO_DEFAULT_LIB
+		WINPLATFORMDEFINES := -DWINAPI_FAMILY=WINAPI_FAMILY_APP -DWINDLL -D_UNICODE -DUNICODE -DWRL_NO_DEFAULT_LIB
+		CFLAGS += $(WINPLATFORMDEFINES)
+		CXXFLAGS += $(WINPLATFORMDEFINES)
 		LDFLAGS += -APPCONTAINER -NXCOMPAT -DYNAMICBASE -MANIFEST:NO -LTCG -OPT:REF -SUBSYSTEM:CONSOLE -MANIFESTUAC:NO -OPT:ICF -ERRORREPORT:PROMPT -NOLOGO -TLBID:1 -DEBUG:FULL -WINMD:NO
 		LIBS += WindowsApp.lib
 	endif
@@ -137,6 +141,7 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
 	CC  = cl.exe
 	CXX = cl.exe
+	LD = link.exe
 
 	reg_query = $(call filter_out2,$(subst $2,,$(shell reg query "$2" -v "$1" 2>nul)))
 	fix_path = $(subst $(SPACE),\ ,$(subst \,/,$1))
@@ -234,11 +239,27 @@ CXXFLAGS += $(fpic) $(VBA_DEFINES)
 
 LIBS :=
 
+OBJOUT   = -o
+LINKOUT  = -o
+
+ifneq (,$(findstring msvc,$(platform)))
+	OBJOUT = -Fo
+	LINKOUT = -out:
+ifeq ($(STATIC_LINKING),1)
+	LD ?= lib.exe
+	STATIC_LINKING=0
+else
+	LD = link.exe
+endif
+else
+	LD = $(CXX)
+endif
+
 %.o: %.cpp
-	$(CXX) -c -o $@ $< $(CXXFLAGS) $(INCFLAGS)
+	$(CXX) -c $(OBJOUT)$@ $< $(CXXFLAGS) $(INCFLAGS)
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(INCFLAGS)
+	$(CC) -c $(OBJOUT)$@ $< $(CFLAGS) $(INCFLAGS)
 
 ifeq ($(platform), theos_ios)
 COMMON_FLAGS := -DIOS $(COMMON_DEFINES) $(INCFLAGS) -I$(THEOS_INCLUDE_PATH) -Wno-error
@@ -253,7 +274,7 @@ $(TARGET): $(OBJS)
 ifeq ($(STATIC_LINKING), 1)
 	$(AR) rcs $@ $(OBJS)
 else
-	$(CXX) -o $@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(LD)  $(LINKOUT)$@ $(SHARED) $(OBJS) $(LDFLAGS) $(LIBS)
 endif
 
 clean:
