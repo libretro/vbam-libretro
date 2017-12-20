@@ -27,7 +27,10 @@ build_script:
   - make -f %makefile_name% platform=%platform%
 
 artifacts:
-  - path: '**\*.dll'
-  - path: '**\*.lib'
-  - path: '**\*.pdb'
+  - path: '**\%target_name%*.dll'
+  - path: '**\%target_name%*.lib'
+  - path: '**\%target_name%*.pdb'
   - path: '**\libretro.h'
+
+on_success:
+  - echo done!
