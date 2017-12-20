@@ -71,7 +71,7 @@ void (*dbgOutput)(const char *s, u32 addr);
 void (*dbgSignal)(int sig, int number);
 
 void *retro_get_memory_data(unsigned id)
-{
+{bvuewl
    if (id == RETRO_MEMORY_SAVE_RAM)
       return libretro_save_buf;
    if (id == RETRO_MEMORY_SYSTEM_RAM)

@@ -31,6 +31,3 @@ artifacts:
   - path: '**\%target_name%*.lib'
   - path: '**\%target_name%*.pdb'
   - path: '**\libretro.h'
-
-on_success:
-  - echo done!
