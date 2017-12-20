@@ -2,6 +2,9 @@ version: 1.0.{build}
 
 image: Visual Studio 2017
 
+environment:
+  makefile_location: src\libretro
+
 configuration:
   - release
 
@@ -11,8 +14,12 @@ platform:
   - uwp_arm
   - desktop_x64
   - desktop_x86
-  
+
 init:
   - set Path=C:\msys64\usr\bin;%Path%
+
+build_script:
+  - cd {makefile_location}
+  - make platform=windows_msvc2017_{platform}
 
 shallow_clone: true
