@@ -1,25 +1,30 @@
 version: 1.0.{build}
 
+shallow_clone: true
+
 image: Visual Studio 2017
 
 environment:
   makefile_location: src\libretro
+  makefile_name: makefile
 
 configuration:
   - release
 
 platform:
-  - uwp_x64
-  - uwp_x86
-  - uwp_arm
-  - desktop_x64
-  - desktop_x86
+  - windows_msvc2017_uwp_x64
+  - windows_msvc2017_uwp_x86
+  - windows_msvc2017_uwp_arm
+  - windows_msvc2017_desktop_x64
+  - windows_msvc2017_desktop_x86
 
 init:
   - set Path=C:\msys64\usr\bin;%Path%
 
 build_script:
   - cd %makefile_location%
-  - make platform=windows_msvc2017_%platform%
+  - make -f %makefile_name% platform=%platform%
 
-shallow_clone: true
+artifacts:
+  - path: '**\*.dll'
+  - path: '**\libretro.h'
