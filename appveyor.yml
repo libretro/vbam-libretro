@@ -19,7 +19,7 @@ init:
   - set Path=C:\msys64\usr\bin;%Path%
 
 build_script:
-  - cd {makefile_location}
-  - make platform=windows_msvc2017_{platform}
+  - cd $(makefile_location)
+  - make platform=windows_msvc2017_$(platform)
 
 shallow_clone: true
