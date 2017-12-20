@@ -1,0 +1,18 @@
+version: 1.0.{build}
+
+image: Visual Studio 2017
+
+configuration:
+  - release
+
+platform:
+  - uwp_x64
+  - uwp_x86
+  - uwp_arm
+  - desktop_x64
+  - desktop_x86
+  
+init:
+  - set Path=C:\msys64\usr\bin;%Path%
+
+shallow_clone: true
