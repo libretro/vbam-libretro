@@ -7,6 +7,7 @@ image: Visual Studio 2017
 environment:
   makefile_location: src\libretro
   makefile_name: makefile
+  target_name: vbam
 
 configuration:
   - release
@@ -27,4 +28,6 @@ build_script:
 
 artifacts:
   - path: '**\*.dll'
+  - path: '**\*.lib'
+  - path: '**\*.pdb'
   - path: '**\libretro.h'
