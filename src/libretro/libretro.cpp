@@ -677,7 +677,8 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
    } while (*c++);
    */
    std::string codeLine=code;
-   std::string name="cheat_"+index;
+   std::string name="cheat_";
+   name += std::to_string(index);
    int matchLength=0;
    std::vector<std::string> codeParts;
    int cursor;
