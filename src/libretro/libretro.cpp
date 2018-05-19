@@ -39,7 +39,6 @@ retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 
 bool enableRtc;
-extern uint64_t joy;
 static bool can_dupe;
 unsigned device_type = 0;
 int emulating = 0;
@@ -598,6 +597,9 @@ static void update_variables(void)
 #define TICKS 5000
 #endif
 
+extern u32 joy;
+extern void GBAReadInput(void);
+
 void retro_run(void)
 {
    bool updated = false;
@@ -605,7 +607,8 @@ void retro_run(void)
       update_variables();
 
    poll_cb();
-
+   joy = systemReadJoypad(-1);
+   GBAReadInput();
    
    has_frame = 0;
 

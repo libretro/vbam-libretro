@@ -3701,8 +3701,37 @@ void CPUInterrupt()
   biosProtected[3] = 0xe5;
 }
 
+u32 joy = 0;
+
+void GBAReadInput(void)
+{
+  P1 = 0x03FF ^ (joy & 0x3FF);
+  if(cpuEEPROMSensorEnabled)
+    systemUpdateMotionSensor();
+  UPDATE_REG(0x130, P1);
+  u16 P1CNT = READ16LE(((u16 *)&ioMem[0x132]));
+  // this seems wrong, but there are cases where the game
+  // can enter the stop state without requesting an IRQ from
+  // the joypad.
+  if((P1CNT & 0x4000) || stopState) {
+    u16 p1 = (0x3FF ^ P1) & 0x3FF;
+    if(P1CNT & 0x8000) {
+      if(p1 == (P1CNT & 0x3FF)) {
+        IF |= 0x1000;
+        UPDATE_REG(0x202, IF);
+      }
+    } else {
+      if(p1 & P1CNT) {
+        IF |= 0x1000;
+        UPDATE_REG(0x202, IF);
+      }
+    }
+  }
+}
+
 void CPULoop(int ticks)
 {
+  bool framedone;
   int clockTicks;
   int timerOverflow = 0;
   // variable used by the CPU core
@@ -3714,6 +3743,7 @@ void CPULoop(int ticks)
     cpuNextEvent = 1;
 #endif
 
+  framedone = false;
   cpuBreakLoop = false;
   cpuNextEvent = CPUUpdateTicks();
   if(cpuNextEvent > ticks)
@@ -3844,33 +3874,6 @@ void CPULoop(int ticks)
                 lastTime = time;
                 count = 0;
               }
-              u32 joy = 0;
-              // update joystick information
-              if(systemReadJoypads())
-                // read default joystick
-                joy = systemReadJoypad(-1);
-              P1 = 0x03FF ^ (joy & 0x3FF);
-              if(cpuEEPROMSensorEnabled)
-                systemUpdateMotionSensor();
-              UPDATE_REG(0x130, P1);
-              u16 P1CNT = READ16LE(((u16 *)&ioMem[0x132]));
-              // this seems wrong, but there are cases where the game
-              // can enter the stop state without requesting an IRQ from
-              // the joypad.
-              if((P1CNT & 0x4000) || stopState) {
-                u16 p1 = (0x3FF ^ P1) & 0x3FF;
-                if(P1CNT & 0x8000) {
-                  if(p1 == (P1CNT & 0x3FF)) {
-                    IF |= 0x1000;
-                    UPDATE_REG(0x202, IF);
-                  }
-                } else {
-                  if(p1 & P1CNT) {
-                    IF |= 0x1000;
-                    UPDATE_REG(0x202, IF);
-                  }
-                }
-              }
 
               u32 ext = (joy >> 10);
               // If no (m) code is enabled, apply the cheats at each LCDline
@@ -3900,6 +3903,7 @@ void CPULoop(int ticks)
                 frameCount++;
               if(systemPauseOnFrame())
                 ticks = 0;
+              framedone = true;
             }
 
             UPDATE_REG(0x04, DISPSTAT);
@@ -4255,7 +4259,7 @@ void CPULoop(int ticks)
       if(cpuNextEvent > ticks)
         cpuNextEvent = ticks;
 
-      if(ticks <= 0 || cpuBreakLoop)
+      if(ticks <= 0 || framedone || cpuBreakLoop)
         break;
 
     }
