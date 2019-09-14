@@ -73,9 +73,14 @@ ifeq ($(IOSSDK),)
    IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
 endif
 
-   CC = clang -arch armv7 -isysroot $(IOSSDK)
-   CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
-   ifeq ($(platform),ios9)
+   ifeq ($(platform), ios-arm64)
+     CC = clang -arch arm64 -isysroot $(IOSSDK)
+     CXX = clang++ -arch arm64 -isysroot $(IOSSDK)
+   else
+     CC = clang -arch armv7 -isysroot $(IOSSDK)
+     CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
+   endif   
+   ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
           CC     += -miphoneos-version-min=8.0
           CXX    += -miphoneos-version-min=8.0
           SHARED += -miphoneos-version-min=8.0
@@ -85,6 +90,16 @@ endif
           SHARED += -miphoneos-version-min=5.0
 endif
 	TILED_RENDERING = 1
+
+else ifeq ($(platform), tvos-arm64)
+   TARGET := $(TARGET_NAME)_libretro_tvos.dylib
+   fpic := -fPIC
+   SHARED := -dynamiclib -DLSB_FIRST
+ifeq ($(IOSSDK),)
+   IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
+endif
+   TILED_RENDERING = 1
+
 else ifeq ($(platform), theos_ios)
 DEPLOYMENT_IOSVERSION = 5.0
 TARGET = iphone:latest:$(DEPLOYMENT_IOSVERSION)
