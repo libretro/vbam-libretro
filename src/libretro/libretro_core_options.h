@@ -97,7 +97,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
         "vbam_forceRTCenable",
         "Force-Enable RTC",
         NULL,
-        "Forces the internal real-time clock to be enabled regardless of rom. Usuable for rom patches that requires clock to be enabled (aka Pokemon).",
+        "Forces the internal real-time clock to be enabled regardless of rom. Useable for rom patches that require clock to be enabled (e.g., Pokemon).",
         NULL,
         "system",
         {
