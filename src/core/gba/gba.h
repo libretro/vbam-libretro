@@ -167,8 +167,13 @@ void SetLoadDotCodeFile(const char* szFile);
 void ResetSaveDotCodeFile();
 void SetSaveDotCodeFile(const char* szFile);
 
-// Updates romSize and realloc rom pointer if needed after soft-patching
+// Update the stored ROM size after applying a soft patch.
+// If the new size is larger than the current buffer, reallocate the ROM buffer.
 void gbaUpdateRomSize(int size);
+
+// Retrieve the current ROM size in bytes.
+// NOTE: size will not be always be power-of-twos, dont use for mask calculation
+size_t gbaGetRomSize();
 
 extern struct EmulatedSystem GBASystem;
 
