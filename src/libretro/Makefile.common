@@ -65,6 +65,12 @@ SOURCES_CXX += \
 	$(CORE_DIR)/core/gba/internal/gbaEreader.cpp \
 	$(CORE_DIR)/core/gba/internal/gbaSram.cpp \
 
+ifeq ($(USE_GBA_DMA_LOOP), 1)
+VBA_DEFINES += -DUSE_GBA_DMA_LOOP
+SOURCES_CXX += \
+	$(CORE_DIR)/core/gba/gbaDma.cpp
+endif
+
 SOURCES_CXX += \
 	$(CORE_DIR)/core/gb/gb.cpp \
 	$(CORE_DIR)/core/gb/gbCartData.cpp \
