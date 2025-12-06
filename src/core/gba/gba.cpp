@@ -71,8 +71,8 @@ int dummyAddress = 0;
 uint32_t cpuDmaLatchData[4];
 uint32_t cpuDmaBusValue = 0;
 
-const uint32_t cpuDmaSrcMask[4] = { 0x07ffffff, 0x0fffffff, 0x0fffffff, 0x0fffffff };
-const uint32_t cpuDmaDstMask[4] = { 0x07ffffff, 0x07ffffff, 0x07ffffff, 0x0fffffff };
+uint32_t cpuDmaSrcMask[4] = { 0x07ffffff, 0x0fffffff, 0x0fffffff, 0x0fffffff };
+uint32_t cpuDmaDstMask[4] = { 0x07ffffff, 0x07ffffff, 0x07ffffff, 0x0fffffff };
 
 bool cpuBreakLoop = false;
 int cpuNextEvent = 0;
@@ -2641,6 +2641,7 @@ void CPUCompareVCOUNT()
     }
 }
 
+#ifndef USE_GBA_DMA_LOOP
 void doDMA(int ch, uint32_t& s, uint32_t& d, uint32_t si, uint32_t di, uint32_t c, int transfer32, bool isFIFO)
 {
     int sm = s >> 24;
@@ -2994,6 +2995,7 @@ void CPUCheckDMA(int reason, int dmamask)
         }
     }
 }
+#endif // !USE_GBA_DMA_LOOP
 
 void CPUUpdateRegister(uint32_t address, uint16_t value)
 {
@@ -4081,7 +4083,7 @@ void CPULoop(int ticks)
     cpuNextEvent = CPUUpdateTicks();
     if (cpuNextEvent > ticks)
         cpuNextEvent = ticks;
-    
+
     for (;;) {
         if (!holdState && !SWITicks) {
             if (armState) {
@@ -4456,7 +4458,7 @@ void CPULoop(int ticks)
                             if (systemPauseOnFrame()) {
                                 ticks = 0;
                             }
-                            
+
                             has_frames = true;
                             cpuBreakLoop = true;
                         }
