@@ -220,7 +220,7 @@ static inline uint32_t CPUReadMemory(uint32_t address)
     case REGION_ROM1EX:
     case REGION_ROM2:
         if (IsEEPROM(address))
-            return 0; // ignore reads from eeprom region outside 0x0D page reads    
+            return 0; // ignore reads from eeprom region outside 0x0D page reads
         else if ((address & 0x01FFFFFC) <= (gbaGetRomSize() - 4))
             value = READ32LE(((uint32_t *)&g_rom[address & 0x01FFFFFC]));
         else {
@@ -356,8 +356,12 @@ static inline uint32_t CPUReadHalfWord(uint32_t address)
             }
         } else if ((address < 0x4000400) && ioReadable[address & 0x3fc]) {
             value = 0;
-        } else
+        } else {
+            if ((address & 0xFFFFFFE) == LOG_ENABLE) {
+                return mgba_log.enable;
+            }
             goto unreadable;
+        }
         break;
     case REGION_PRAM:
         value = READ16LE(((uint16_t*)&g_paletteRAM[address & 0x3fe]));
@@ -490,8 +494,13 @@ static inline uint8_t CPUReadByte(uint32_t address)
     case REGION_IO:
         if ((address < 0x4000400) && ioReadable[address & 0x3ff])
             return g_ioMem[address & 0x3ff];
-        else
-            goto unreadable;
+        else {
+            switch (address) {
+            case LOG_ENABLE:     return (uint8_t)(mgba_log.enable >> 0);
+            case LOG_ENABLE + 1: return (uint8_t)(mgba_log.enable >> 8);
+            }
+        }
+        goto unreadable;
     case REGION_PRAM:
         return g_paletteRAM[address & 0x3ff];
     case REGION_VRAM:
@@ -512,7 +521,7 @@ static inline uint8_t CPUReadByte(uint32_t address)
             return 0; // ignore reads from eeprom region outside 0x0D page reads
         else if ((address & 0x01FFFFFF) <= gbaGetRomSize())
             return g_rom[address & 0x01FFFFFF];
-        else 
+        else
             return (uint8_t)ROMReadOOB(address & 0x01FFFFFE);
     case REGION_ROM2EX:
         if (cpuEEPROMEnabled)
@@ -598,6 +607,8 @@ static inline void CPUWriteMemory(uint32_t address, uint32_t value)
         if (address < 0x4000400) {
             CPUUpdateRegister((address & 0x3FC), value & 0xFFFF);
             CPUUpdateRegister((address & 0x3FC) + 2, (value >> 16));
+        } else if (address >= LOG_STRING_LO && address < LOG_STRING_HI) {
+            WRITE32LE((uint32_t*)&mgba_log.message[(address - LOG_STRING_LO) & 0xFFFFFFC], value);
         } else
             goto unwritable;
         break;
@@ -712,8 +723,27 @@ static inline void CPUWriteHalfWord(uint32_t address, uint16_t value)
     case REGION_IO:
         if (address < 0x4000400)
             CPUUpdateRegister(address & 0x3fe, value);
-        else
+        else {
+            switch (address) {
+            case LOG_SEND:
+                if (mgba_log.enable && (value & 0x100) != 0) {
+                    log("%s\n", mgba_log.message.data());
+                    mgba_log.message.fill(0);
+                }
+                break;
+            case LOG_ENABLE:
+                if (value == 0xC0DE) {
+                    mgba_log.enable = 0x1DEA;
+                }
+                break;
+            default:
+                if(address >= LOG_STRING_LO && address < LOG_STRING_HI) {
+                    WRITE16LE((uint16_t*)&mgba_log.message[(address - LOG_STRING_LO) & 0xFFFFFFE], value);
+                    break;
+                }
+            }
             goto unwritable;
+        }
         break;
     case REGION_PRAM:
 #ifdef VBAM_ENABLE_DEBUGGER
@@ -888,9 +918,13 @@ static inline void CPUWriteByte(uint32_t address, uint8_t b)
                 }
             }
             break;
-        } else
-            goto unwritable;
-        break;
+        } else {
+            if(address >= LOG_STRING_LO && address < LOG_STRING_HI) {
+                mgba_log.message[address - LOG_STRING_LO] = b;
+                break;
+            }
+        }
+        goto unwritable;
     case REGION_PRAM:
         // no need to switch
         *((uint16_t*)&g_paletteRAM[address & 0x3FE]) = (b << 8) | b;

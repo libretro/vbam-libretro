@@ -1,6 +1,7 @@
 #ifndef VBAM_CORE_GBA_GBA_H_
 #define VBAM_CORE_GBA_GBA_H_
 
+#include <array>
 #include <cstdint>
 
 #include "core/base/system.h"
@@ -406,5 +407,20 @@ enum ioRegs {
 
     IO_REG_END,
 };
+
+enum mgba_log_enum {
+    LOG_STRING_LO   = 0x04FFF600,
+    LOG_STRING_HI   = 0x04FFF700,
+    LOG_SEND        = 0x04FFF700,
+    LOG_ENABLE      = 0x04FFF780, 
+    LOG_BUFFER_SIZE = 256,
+};
+
+typedef struct MGBALog {
+    uint16_t enable = 0;
+    std::array<char, LOG_BUFFER_SIZE + 1> message;
+} MGBALog;
+
+extern MGBALog mgba_log;
 
 #endif  // VBAM_CORE_GBA_GBA_H_

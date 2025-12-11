@@ -52,6 +52,8 @@
 #define strdup _strdup
 #endif
 
+MGBALog mgba_log;
+
 extern int emulating;
 bool debugger = false;
 
@@ -3742,6 +3744,7 @@ void CPUInit(const char* biosFileName, bool useBiosFile)
     } else {
         agbPrintEnable(false);
     }
+    mgba_log.message.fill(0);
 }
 
 void SetSaveType(int st)
