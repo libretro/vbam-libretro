@@ -3637,9 +3637,6 @@ void applyTimer()
     timerOnOffDelay = 0;
 }
 
-uint8_t cpuBitsSet[256];
-uint8_t cpuLowestBitSet[256];
-
 void CPUInit(const char* biosFileName, bool useBiosFile)
 {
 #ifdef WORDS_BIGENDIAN
@@ -3677,7 +3674,7 @@ void CPUInit(const char* biosFileName, bool useBiosFile)
     biosProtected[2] = 0x29;
     biosProtected[3] = 0xe1;
 
-    for (i = 0; i < 256; i++) {
+    /*for (i = 0; i < 256; i++) {
         int count = 0;
         int j;
         for (j = 0; j < 8; j++)
@@ -3689,7 +3686,7 @@ void CPUInit(const char* biosFileName, bool useBiosFile)
             if (i & (1 << j))
                 break;
         cpuLowestBitSet[i] = DowncastU8(j);
-    }
+    }*/
 
     for (i = 0; i < 0x400; i++)
         ioReadable[i] = true;
